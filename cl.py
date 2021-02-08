@@ -20,30 +20,32 @@ def cl_search(filters, lim):
 		for res in results:
 			os.system(res)
 
-ac = len(sys.argv)
+
+argcount = len(sys.argv)
 filters = {}
 lim = 10
-if ac == 1 :
+
+
+if argcount == 1:
 	filters['query'] = input("Search Term: ")
-	filters['max_price'] = input("Enter max price: ")
-	filters['min_price'] = input("Enter min price: ")
-	lim = input("Enter max listings to open: ")
+	filters['min_price'] = input("Min price: ")
+	filters['max_price'] = input("Max price: ")
+	lim = input("Max Results To Show: ")
 	lim = int(lim) if lim else 500
 	filters['posted_today'] = False if input("Only today\'s posts?)(y/n)" ).lower() == 'n' else True
 	cl_search(filters,lim);
 	exit();
-
-if ac > 1:
+if argcount > 1:
 	#query only
 	filters['query'] = sys.argv[1]
-	if ac > 2:
-		# query and lim
+	if argcount > 2:
+		# query and minimum
 		filters['min_price'] = sys.argv[2]
-		if ac > 3:
-			# query and lim and max
+		if argcount > 3:
+			# query min,max
 			filters['max_price'] = sys.argv[3]
-			if ac > 4:
-				#query and lim and max and min
+			if argcount > 4:
+				#query, min, max, result limit
 				lim = sys.argv[4]
 filters["posted_today"] = True
 lim = int(lim)
