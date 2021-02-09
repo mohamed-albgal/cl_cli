@@ -11,12 +11,8 @@ def cl_search(filters, lim):
 		resp = cl_fs.get_results(sort_by='newest', limit=lim)
 		if not resp:
 			raise Exception("There was an error scraping")
-		count = 0;
-		results = []
-		for result in resp:
-			results.append(f"open {result['url']}")
-			count+=1
-		if count == 0:
+		results = [f"open {result['url']}" for result in resp]
+		if not results:
 			print(" ")
 			print(f"Nothing found for {filters['query']}")
 			exitPrompt();
