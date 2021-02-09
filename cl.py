@@ -43,17 +43,15 @@ def batchOpen(opencommands):
 	while show.lower() != 'q':
 		for i in range(numberNewTabs):
 				if not opencommands:
-					exitPrompt()
-					quit()
+					show = 'q'
+					break;
 				os.system(opencommands.pop())
 				count += 1
-		left = numberNewTabs if numberNewTabs < length - count else length-count
-		if left:
-			show = input(f"Press any key to show {left} more, press q to quit\t")
-		else:
-			print(f"Finished")
-			exitPrompt()
-			quit()
+		moreleft = numberNewTabs if numberNewTabs < length - count else length-count
+		if moreleft:
+			show = input(f"Press any key to show {moreleft} more, press q to quit, or s start start a new search \t")
+	print(f"Finished")
+	exitPrompt()
 
 def cleanStart():
 
