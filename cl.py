@@ -49,12 +49,12 @@ def batchOpen(opencommands):
 				count += 1
 		moreleft = numberNewTabs if numberNewTabs < length - count else length-count
 		if moreleft:
-			show = input(f"Press any key to show {moreleft} more, press q to quit, or s start start a new search \t")
+			show = input(f"Press any key to show {moreleft} more, press q to quit this search \t")
 	print(f"Finished")
 	exitPrompt()
 
 def cleanStart():
-
+	filters = {}
 	filters['query'] = input("Search Term: ") or None
 	minp = input("Min price: ") or None
 	filters['min_price'] = minp
@@ -64,26 +64,27 @@ def cleanStart():
 	filters['posted_today'] = False if input("Only today\'s posts?)(y/n)" ).lower() == 'n' else True
 	batchOpen(cl_search(filters,lim));
 
-argcount = len(sys.argv)
-filters = {}
-lim = 1000
+def main(args):
+	argcount = len(args)
+	filters = {}
+	lim = 1000
 
-if argcount == 1:
-	cleanStart();
-else:
-	#query only
-	filters['query'] = sys.argv[1]
-	if argcount > 2:
-		# query and minimum
-		filters['min_price'] = sys.argv[2]
-		if argcount > 3:
-			# query min,max
-			filters['max_price'] = sys.argv[3]
-			if argcount > 4:
-				#query, min, max, result limit
-				lim = sys.argv[4]
-	filters["posted_today"] = True
-	batchOpen(cl_search(filters,lim))
+	if argcount == 1:
+		cleanStart();
+	else:
+		#query only
+		filters['query'] = args[1]
+		if argcount > 2:
+			# query and minimum
+			filters['min_price'] = args[2]
+			if argcount > 3:
+				# query min,max
+				filters['max_price'] = args[3]
+				if argcount > 4:
+					#query, min, max, result limit
+					lim = args[4]
+		filters["posted_today"] = True
+		batchOpen(cl_search(filters,lim))
 
-
-
+if __name__ == "__main__":
+	main(sys.argv)
