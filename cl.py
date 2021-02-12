@@ -21,7 +21,7 @@ def cl_search(filters, lim):
 def exitPrompt():
 	repeat = input("To make another search, type y\t")
 	if repeat.lower() == "y":
-		cleanStart()
+		main()
 	else:
 		quit()
 
@@ -44,25 +44,26 @@ def batchOpen(opencommands):
 	print(f"Search Completed")
 	exitPrompt()
 
-def cleanStart():
-	filters = {}
+def cleanStart(filters={}):
 	filters['query'] = input("Search Term: ") or None
 	filters['min_price'] = input("Min price: ") or None
 	filters['max_price'] = input("Max price: ") or None
 	lim = input("Max Results To Show: ") or 300
 	filters['posted_today'] = False if input("Only today\'s posts?)(y/n)\t").lower() == 'n' else True
-	batchOpen(cl_search(filters,lim));
+	return (filters,lim)
 
-def main(args):
+
+def main(args=[None]):
 	argcount = len(args)
+	lim = 0
+	filters = {}
 	if argcount == 1:
-		cleanStart();
+		filters,lim=cleanStart(filters);
 	else:
 		fields = ['query', 'min_price', 'max_price']
 		filters = {fields[i-1]:args[i] for i in range(1,len(args))}
 		lim = 1000 if argcount <= 4 else args[4]
 		filters["posted_today"] = True
-		batchOpen(cl_search(filters,lim))
 
 if __name__ == "__main__":
 	main(sys.argv)
