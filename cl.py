@@ -21,21 +21,19 @@ def cl_search(filters, limit):
 
 def batchOpen(urls):
 	if urls is None: return
-	length = len(urls)
-	numberNewTabs = 5 if length >= 5 else length
+	maxTabs = 5
+	numberNewTabs = min(maxTabs, len(urls))
 	show = input(f"Found {len(urls)} listings, open {numberNewTabs} in the browser?\t(y/n)")
 	if show.lower() == 'n': return
-	count = 0
 	while show.lower() != 'q':
 		for i in range(numberNewTabs):
 				if not urls:
 					show = 'q'
 					break;
 				os.system(f"open {urls.pop()}")
-				count += 1
-		moreleft = numberNewTabs if numberNewTabs < length - count else length-count
-		if moreleft:
-			show = input(f"Press any key to show {moreleft} more, press q to quit this search \t")
+		remainingUrls = min(numberNewTabs,len(urls))
+		if remainingUrls:
+			show = input(f"Press any key to show {remainingUrls} more, press q to quit this search \t")
 	print(f"Search Completed")
 
 def promptForSearchParams(params={}):
