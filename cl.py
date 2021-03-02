@@ -6,17 +6,10 @@ import sys
 def cl_search(filters):
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
 	resp = cl_fs.get_results(sort_by='newest', limit=200)
-	print(x for x in resp)
-	urls = [x['url'] for x in resp]
-	names= [x['name'] for x in resp]
-	print(f"len of names: {len(names)}")
-	print(f"len of urls: {len(urls)}")
 	res = {}
-	# for i in range(len(urls)): 
-	# 	res[names[i]] = urls[i]
-	# print(res)
-	
-	return None if not urls else res
+	for x in resp:
+		res[x['name']]=x['url']
+	return res or None
 
 def promptForSearchParams(params={}):
 	
@@ -38,16 +31,23 @@ def splitArgs(args):
 		return [" ".join(words)] + numbers
 
 def batchShow(names,urls):
-	
-	for i,x in enumerate(names):
-		letter = chr(ord('a') + i)
-		print(f"[{letter}]. {x}")
-	choices = input("Enter the letter of the listing you want to view or type 'all' to show all")
-	if choices.lower() == "all": 
-		choices = [x for x in 'abcdefgh']
-	for index in choices: 
-		os.system("open {}".format(urls[ord(index)-ord('a')]))
-		# print("f{}".format(urls[ord(index)-ord('a')]))
+	done = ""
+	letters = [x for x in 'abcdefgh']
+	while done != "next" and urls: 
+		for i,x in enumerate(names): 
+			print(f"[{letters[i]}]. {x}")
+		choices = input("Enter the letter of the listing you want to view or type 'all' to show all\t")
+		if choices.lower() == "all": 
+			choices = [x for x in 'abcdefgh']
+		else: 
+			choices = list(filter(lambda x: x in letters, choices))
+		for index in choices:
+			choice = ord(index)-ord('a')
+			os.system("open {}".format(urls[choice]))
+			del names[choice]
+			del urls[choice]
+			del letters[choice]
+		done = input("To show next batch enter 'next' or continue")
 
 def displayListings(listings):
 	if not listings:
@@ -74,7 +74,7 @@ def main(args=None):
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
-			searchResults = cl_search(searchResults)
+			searchResults = cl_search(apiparams)
 			displayListings(searchResults)
 			break
 
@@ -89,6 +89,8 @@ if __name__ == "__main__":
 	try:
 		main(sys.argv[1:])
 	except SystemExit:
+		pass
+	except KeyboardInterrupt:
 		pass
 	finally:
 		print(line)
