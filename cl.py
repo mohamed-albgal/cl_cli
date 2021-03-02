@@ -13,32 +13,11 @@ def cl_search(filters):
 		res[x['name']]=item
 	return res or None
 
-def promptForSearchParams(params={}):
-    	
-	def validateInput(prompt):
-		userinput = input(f"{prompt}: ") or None
-		while userinput and not userinput.isdigit():
-			userinput = input(f"Invalid input, re-enter {prompt}  ")
-		return userinput
-	
-	params['query'] = input("\n\nSearch Term:  ") or None
-	params['min_price'] = validateInput("Minimum Price")
-	params['max_price'] = validateInput("Maximum Price")
-	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
-	return params
 
-def splitArgs(args): 
-	today = None
-	last=None
-	if len(args[-1]) == 1 and args[-1].lower() in "yn": 
-		today = args[-1]
-		last = -1
-	return [args[0]] + args[1:last] + [today]
 
-def batchShow(listings, count,totalcount):
+def batchShow(listings, count,totalcount): 
 	records = dict(zip([x for x in "abcdefgh"],listings))
 	while records: 
-		#show the titles
 		print(f"\n-----Page {count} of {totalcount}-----\n")
 		for letter in records: 
 			tup = records.get(letter)
@@ -67,24 +46,43 @@ def displayListings(query,listings, batchSize=8):
 		i+=batchSize
 		count += 1
 
+def promptForSearchParams(params={}):
+    	
+	def validateInput(prompt):
+		userinput = input(f"{prompt}: ") or None
+		while userinput and not userinput.isdigit():
+			userinput = input(f"Invalid input, re-enter {prompt}  ")
+		return userinput
+	
+	params['query'] = input("\n\nSearch Term:  ") or None
+	params['min_price'] = validateInput("Minimum Price")
+	params['max_price'] = validateInput("Maximum Price")
+	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
+	return params
+
+def splitArgs(args): 
+	today = None
+	last=None
+	if len(args[-1]) == 1 and args[-1].lower() in "yn": 
+		today = args[-1]
+		last = -1
+	return [args[0]] + args[1:last] + [today == 'y']
 
 def main(args=None):
-	fields = ['query', 'min_price', 'max_price']
+	fields = ['query', 'min_price', 'max_price', 'posted_today']
 	done = False
 	while not done:
 		# if called without args, prompt
 		if not args:
 			inputs = promptForSearchParams()
 			searchResults = cl_search(inputs)
-			displayListings(inputs[0],searchResults)
+			displayListings(inputs['query'],searchResults)
 			done = "y" not in  input("To make another search type \"y \"\t ").lower()
 		else:
 			userinputs = splitArgs(args)
-			print(userinputs)
 			apiparams = dict([x for x in zip(fields,userinputs)])
-			apiparams["posted_today"] = True
 			searchResults = cl_search(apiparams)
-			displayListings(apiparams['query'],searchResults,4)
+			displayListings(apiparams['query'], searchResults,4)
 			break
 
 if __name__ == "__main__":
