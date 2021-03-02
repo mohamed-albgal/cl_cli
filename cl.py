@@ -4,27 +4,26 @@ import os
 import sys
 
 def cl_search(filters):
-	try:
-		cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
-		resp = cl_fs.get_results(sort_by='newest', limit=200)
-		results = [result['url'] for result in resp]
-		return results or print(f"\n---Nothing found for {filters['query']}---\n")
-	except:
-		print("!"*20+"\t"+"!"*20+"\t")
-		print(f"There was an external looking that up")
-		return None
+	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
+	resp = cl_fs.get_results(sort_by='newest', limit=200)
+	urls = [result['url'] for result in resp]
+	names= [result['name'] for result in resp]
+	res = None if not urls else (urls,names)
+	return res or print(f"\n---Nothing found for {filters['query']}---\n")
 
-def batchOpen(urls):
-	if urls is None: return
-	maxTabs = 5
-	numberNewTabs = min(maxTabs, len(urls))
-	done = input(f"Found {len(urls)} listings, open {numberNewTabs} in the browser?(y/n)\t").lower() == 'n'
-	while not done:
-		for _ in range(numberNewTabs): 
-			os.system(f"open {urls.pop()}")
-		numberNewTabs = min(numberNewTabs,len(urls))
-		done =  not numberNewTabs or input(f"Press any key to show {numberNewTabs} more, press q to quit this search \t").lower() == 'q'
-	print(f"\n---Search Completed---\n")
+# def batchOpen(urls):
+# 	if urls is None: return
+# 	maxTabs = 5
+# 	numberNewTabs = min(maxTabs, len(urls))
+# 	done = input(f"Found {len(urls)} listings, open {numberNewTabs} in the browser?(y/n)\t").lower() == 'n'
+# 	while not done:
+# 		for _ in range(numberNewTabs): 
+# 			os.system(f"open {urls.pop()}")
+# 		numberNewTabs = min(numberNewTabs,len(urls))
+# 		done =  not numberNewTabs or input(f"Press any key to show {numberNewTabs} more, press q to quit this search \t").lower() == 'q'
+# 	print(f"\n---Search Completed---\n")
+
+
 
 def promptForSearchParams(params={}):
 	
@@ -45,6 +44,18 @@ def splitArgs(args):
 		numbers = list(filter(lambda x: type(x) is int, args))
 		return [" ".join(words)] + numbers
 
+def showListings(urls,names):
+	#show names and urls 8 at a time
+	#read input of which to open in a new browser
+	print(f"[{chr(ord('a' + i))}]. {x}" for i,x in enumerate(names))
+	choices = input("Select the line number of the listing you want to view")
+	for index in choices:
+    		os.system("open {}".format(urls[ord(index)-ord('a')]))
+    	
+	
+
+
+
 def main(args=None):
 	fields = ['query', 'min_price', 'max_price']
 	done = False
@@ -58,8 +69,13 @@ def main(args=None):
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
-			urls = cl_search(apiparams)
-			batchOpen(urls)
+			listings = cl_search(apiparams)
+			#show 8 strings
+			#choose some by number to open in tabs
+			#remove those from the list
+			#repeat
+			showListings(listings[0],listings[1])
+			#####batchOpen(urls)
 			break
 
 if __name__ == "__main__":
@@ -70,6 +86,11 @@ if __name__ == "__main__":
 	print(cl)
 	print(stars)
 	print(line)
-
-	main(sys.argv[1:])
-	print(line)
+	try:
+		main(sys.argv[1:])
+	except SystemExit:
+		pass
+	except:
+		print("There was an errror please try again later")
+	finally:
+		print(line)
