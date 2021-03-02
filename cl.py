@@ -4,7 +4,7 @@ import os
 import sys
 import math
 
-def cl_search(filters):
+def cl_search(filters): 
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
 	resp = cl_fs.get_results(sort_by='newest', limit=200)
 	res = {}
@@ -12,6 +12,7 @@ def cl_search(filters):
 		item=[x['url'], x['price'], x['where']]
 		res[x['name']]=item
 	return res or None
+
 
 
 
@@ -32,6 +33,7 @@ def batchShow(listings, count,totalcount):
 			del records[letter]
 			
 
+
 def displayListings(query,listings, batchSize=8):
 	if not listings:
 		print(f"\n---Nothing found for {query}---\n")
@@ -43,47 +45,45 @@ def displayListings(query,listings, batchSize=8):
 	print(f"\nFound {len(listings)} listings")
 	while i < len(items):
 		batchShow(items[i:i+batchSize], count, total)
-		i+=batchSize
+		i += batchSize
 		count += 1
 
-def promptForSearchParams(params={}):
-    	
+
+
+def promptForSearchParams(): 
+	params={}
 	def validateInput(prompt):
 		userinput = input(f"{prompt}: ") or None
 		while userinput and not userinput.isdigit():
 			userinput = input(f"Invalid input, re-enter {prompt}  ")
 		return userinput
-	
-	params['query'] = input("\n\nSearch Term:  ") or None
+	params['query'] = input("\nSearch Term:  ") or None
 	params['min_price'] = validateInput("Minimum Price")
 	params['max_price'] = validateInput("Maximum Price")
 	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
 	return params
 
-def splitArgs(args): 
-	today = None
-	last=None
-	if len(args[-1]) == 1 and args[-1].lower() in "yn": 
-		today = args[-1]
-		last = -1
-	return [args[0]] + args[1:last] + [today == 'y']
 
-def main(args=None):
-	fields = ['query', 'min_price', 'max_price', 'posted_today']
-	done = False
-	while not done:
-		# if called without args, prompt
-		if not args:
-			inputs = promptForSearchParams()
-			searchResults = cl_search(inputs)
-			displayListings(inputs['query'],searchResults)
-			done = "y" not in  input("To make another search type \"y \"\t ").lower()
-		else:
-			userinputs = splitArgs(args)
-			apiparams = dict([x for x in zip(fields,userinputs)])
-			searchResults = cl_search(apiparams)
-			displayListings(apiparams['query'], searchResults,4)
-			break
+
+def parseArgs(args): 
+	apiparams = {}
+	today=False
+	if len(args[-1]) == 1 and args[-1].lower() in "yn": 
+		today = args[-1] == "y"
+		del args[-1]
+	apiparams = dict([x for x in zip(['query', 'min_price', 'max_price'],args)])
+	apiparams['posted_today'] = today
+	return apiparams
+
+
+
+def main(args):
+	while True:
+		apiparams = promptForSearchParams() if not args else parseArgs(args)
+		searchResults = cl_search(apiparams)
+		displayListings(apiparams['query'],searchResults)
+		args=None
+		if "y" not in  input("\nPress 'y' to make another search:  ").lower(): break
 
 if __name__ == "__main__":
 	stars = "*"*60
@@ -99,5 +99,9 @@ if __name__ == "__main__":
 		pass
 	except KeyboardInterrupt:
 		pass
+	except Exception as e:
+		print("\n\n\n...there was an error please try again...\n\n\n")
+		print(e)
+		
 	finally:
 		print("\n",line)
