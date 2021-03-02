@@ -2,6 +2,7 @@
 from craigslist import CraigslistForSale
 import os
 import sys
+import math
 
 def cl_search(filters):
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
@@ -19,7 +20,7 @@ def promptForSearchParams(params={}):
 			userinput = input(f"Invalid input, re-enter {prompt}  ")
 		return userinput
 	
-	params['query'] = input("Search Term:  ") or None
+	params['query'] = input("\n\nSearch Term:  ") or None
 	params['min_price'] = validateInput("Minimum Price")
 	params['max_price'] = validateInput("Maximum Price")
 	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
@@ -30,36 +31,36 @@ def splitArgs(args):
 		numbers = list(filter(lambda x: type(x) is int, args))
 		return [" ".join(words)] + numbers
 
-def batchShow(names,urls):
-	done = ""
-	letters = [x for x in 'abcdefgh']
-	while done != "next" and urls: 
-		for i,x in enumerate(names): 
-			print(f"[{letters[i]}]. {x}")
-		choices = input("Enter the letter of the listing you want to view or type 'all' to show all\t")
-		if choices.lower() == "all": 
-			choices = [x for x in 'abcdefgh']
-		else: 
-			choices = list(filter(lambda x: x in letters, choices))
-		for index in choices:
-			choice = ord(index)-ord('a')
-			os.system("open {}".format(urls[choice]))
-			del names[choice]
-			del urls[choice]
-			del letters[choice]
-		done = input("To show next batch enter 'next' or continue")
+def batchShow(listings, count,totalcount):
+	records = dict(zip([x for x in "abcdefgh"],listings))
+	while records: 
+		#show the titles
+		print(f"\n-----Page {count} of {totalcount}-----\n")
+		for letter in records: 
+			tup = records.get(letter)
+			print(f"[{letter}]--{tup[0]}")
+		choices = input("\n\nEnter the letter(s) of the listing(s) or 'next' or 'all:' ").lower()
+		if choices == "next": break
+		choices = set(filter(lambda e: e in records.keys(), [x for x in choices])) if choices != "all" else [x for x in records.keys()]
+		for letter in choices:
+			os.system(f"open {records.get(letter)[1]}")
+			del records[letter]
+			
 
-def displayListings(listings):
+def displayListings(listings, batchSize=8):
 	if not listings:
 		print(f"\n---Nothing found---\n")
 		return
-	index = 0
-	count = len(listings)
-	names=[x for x in listings.keys()]
-	urls = [x for x in listings.values()]
-	while index < count:
-		batchShow(names[index:index+8], urls[index:index+8])
-		index += 8
+	i = 0;
+	count = 1
+	items = list(listings.items())
+	total = math.ceil(len(items) / batchSize) 
+	print(f"\nFound {len(listings)} listings")
+	while i < len(items):
+		batchShow(items[i:i+batchSize], count, total)
+		i+=batchSize
+		count += 1
+
 
 def main(args=None):
 	fields = ['query', 'min_price', 'max_price']
@@ -68,14 +69,14 @@ def main(args=None):
 		#if no args, prompt for search parameters
 		if not args:
 			searchResults = cl_search(promptForSearchParams())
-			displayListings(searchResults)
+			displayListings(searchResults, 8)
 			done = input("To make another search type \"y \"\t ").lower() != "y"
 		else:
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
 			searchResults = cl_search(apiparams)
-			displayListings(searchResults)
+			displayListings(searchResults,4)
 			break
 
 if __name__ == "__main__":
@@ -92,5 +93,7 @@ if __name__ == "__main__":
 		pass
 	except KeyboardInterrupt:
 		pass
+	except Exception:
+		print("...there was an error...please try again in a few seconds")
 	finally:
 		print(line)
