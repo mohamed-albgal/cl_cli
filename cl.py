@@ -14,7 +14,7 @@ def cl_search(filters):
 	return res or None
 
 def promptForSearchParams(params={}):
-	
+    	
 	def validateInput(prompt):
 		userinput = input(f"{prompt}: ") or None
 		while userinput and not userinput.isdigit():
