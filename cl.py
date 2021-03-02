@@ -8,8 +8,9 @@ def cl_search(filters):
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
 	resp = cl_fs.get_results(sort_by='newest', limit=200)
 	res = {}
-	for x in resp:
-		res[x['name']]=x['url']
+	for x in resp: 
+		item=[x['url'], x['price'], x['where']]
+		res[x['name']]=item
 	return res or None
 
 def promptForSearchParams(params={}):
@@ -38,12 +39,14 @@ def batchShow(listings, count,totalcount):
 		print(f"\n-----Page {count} of {totalcount}-----\n")
 		for letter in records: 
 			tup = records.get(letter)
-			print(f"[{letter}]--{tup[0]}")
+			price = tup[1][1]
+			#location = tup[1][2]
+			print(f"[{letter}]--{price}--{tup[0].strip()}")
 		choices = input("\n\nEnter the letter(s) of the listing(s) or 'next' or 'all:' ").lower()
 		if choices == "next": break
 		choices = set(filter(lambda e: e in records.keys(), [x for x in choices])) if choices != "all" else [x for x in records.keys()]
 		for letter in choices:
-			os.system(f"open {records.get(letter)[1]}")
+			os.system(f"open {records.get(letter)[1][0]}")
 			del records[letter]
 			
 
@@ -70,7 +73,7 @@ def main(args=None):
 		if not args:
 			searchResults = cl_search(promptForSearchParams())
 			displayListings(searchResults, 8)
-			done = input("To make another search type \"y \"\t ").lower() != "y"
+			done = "y" not in  input("To make another search type \"y \"\t ").lower()
 		else:
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
@@ -93,7 +96,5 @@ if __name__ == "__main__":
 		pass
 	except KeyboardInterrupt:
 		pass
-	except Exception:
-		print("...there was an error...please try again in a few seconds")
 	finally:
-		print(line)
+		print("\n",line)
