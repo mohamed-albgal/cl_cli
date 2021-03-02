@@ -28,9 +28,12 @@ def promptForSearchParams(params={}):
 	return params
 
 def splitArgs(args): 
-	words = list(filter(lambda x: type(x) is str, args))
-	numbers = list(filter(lambda x: type(x) is int, args))
-	return [" ".join(words)] + numbers
+	today = None
+	last=None
+	if len(args[-1]) == 1 and args[-1].lower() in "yn": 
+		today = args[-1]
+		last = -1
+	return [args[0]] + args[1:last] + [today]
 
 def batchShow(listings, count,totalcount):
 	records = dict(zip([x for x in "abcdefgh"],listings))
@@ -77,6 +80,7 @@ def main(args=None):
 			done = "y" not in  input("To make another search type \"y \"\t ").lower()
 		else:
 			userinputs = splitArgs(args)
+			print(userinputs)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
 			searchResults = cl_search(apiparams)
