@@ -6,7 +6,7 @@ import math
 
 def cl_search(filters): 
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
-	resp = cl_fs.get_results(sort_by='newest', limit=200)
+	resp = cl_fs.get_results(sort_by='newest', limit=500)
 	res = {}
 	for x in resp: 
 		item=[x['url'], x['price'], x['where']]
@@ -25,8 +25,8 @@ def batchShow(listings, count,totalcount):
 			price = tup[1][1]
 			#location = tup[1][2]
 			print(f"[{letter}]--{price}--{tup[0].strip()}")
-		choices = input("\n\nEnter the letter(s) of the listing(s) or 'next' or 'all:' ").lower()
-		if choices == "next": break
+		choices = input("\n\nEnter the letter(s) of the listing(s) or 'all' or 'n' for next page: ").lower()
+		if choices == "n": break
 		choices = set(filter(lambda e: e in records.keys(), [x for x in choices])) if choices != "all" else [x for x in records.keys()]
 		for letter in choices:
 			os.system(f"open {records.get(letter)[1][0]}")
