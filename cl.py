@@ -27,10 +27,10 @@ def promptForSearchParams(params={}):
 	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
 	return params
 
-def splitArgs(args):
-		words = list(filter(lambda x: type(x) is str, args))
-		numbers = list(filter(lambda x: type(x) is int, args))
-		return [" ".join(words)] + numbers
+def splitArgs(args): 
+	words = list(filter(lambda x: type(x) is str, args))
+	numbers = list(filter(lambda x: type(x) is int, args))
+	return [" ".join(words)] + numbers
 
 def batchShow(listings, count,totalcount):
 	records = dict(zip([x for x in "abcdefgh"],listings))
@@ -50,9 +50,9 @@ def batchShow(listings, count,totalcount):
 			del records[letter]
 			
 
-def displayListings(listings, batchSize=8):
+def displayListings(query,listings, batchSize=8):
 	if not listings:
-		print(f"\n---Nothing found---\n")
+		print(f"\n---Nothing found for {query}---\n")
 		return
 	i = 0;
 	count = 1
@@ -69,17 +69,18 @@ def main(args=None):
 	fields = ['query', 'min_price', 'max_price']
 	done = False
 	while not done:
-		#if no args, prompt for search parameters
+		# if called without args, prompt
 		if not args:
-			searchResults = cl_search(promptForSearchParams())
-			displayListings(searchResults, 8)
+			inputs = promptForSearchParams()
+			searchResults = cl_search(inputs)
+			displayListings(inputs[0],searchResults)
 			done = "y" not in  input("To make another search type \"y \"\t ").lower()
 		else:
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
 			searchResults = cl_search(apiparams)
-			displayListings(searchResults,4)
+			displayListings(apiparams['query'],searchResults,4)
 			break
 
 if __name__ == "__main__":
