@@ -6,24 +6,17 @@ import sys
 def cl_search(filters):
 	cl_fs = CraigslistForSale(site='sfbay', area='sby', category='sss',filters=filters)
 	resp = cl_fs.get_results(sort_by='newest', limit=200)
-	urls = [result['url'] for result in resp]
-	names= [result['name'] for result in resp]
-	res = None if not urls else (urls,names)
-	return res or print(f"\n---Nothing found for {filters['query']}---\n")
-
-# def batchOpen(urls):
-# 	if urls is None: return
-# 	maxTabs = 5
-# 	numberNewTabs = min(maxTabs, len(urls))
-# 	done = input(f"Found {len(urls)} listings, open {numberNewTabs} in the browser?(y/n)\t").lower() == 'n'
-# 	while not done:
-# 		for _ in range(numberNewTabs): 
-# 			os.system(f"open {urls.pop()}")
-# 		numberNewTabs = min(numberNewTabs,len(urls))
-# 		done =  not numberNewTabs or input(f"Press any key to show {numberNewTabs} more, press q to quit this search \t").lower() == 'q'
-# 	print(f"\n---Search Completed---\n")
-
-
+	print(x for x in resp)
+	urls = [x['url'] for x in resp]
+	names= [x['name'] for x in resp]
+	print(f"len of names: {len(names)}")
+	print(f"len of urls: {len(urls)}")
+	res = {}
+	# for i in range(len(urls)): 
+	# 	res[names[i]] = urls[i]
+	# print(res)
+	
+	return None if not urls else res
 
 def promptForSearchParams(params={}):
 	
@@ -44,17 +37,29 @@ def splitArgs(args):
 		numbers = list(filter(lambda x: type(x) is int, args))
 		return [" ".join(words)] + numbers
 
-def showListings(urls,names):
-	#show names and urls 8 at a time
-	#read input of which to open in a new browser
-	print(f"[{chr(ord('a' + i))}]. {x}" for i,x in enumerate(names))
-	choices = input("Select the line number of the listing you want to view")
-	for index in choices:
-    		os.system("open {}".format(urls[ord(index)-ord('a')]))
-    	
+def batchShow(names,urls):
 	
+	for i,x in enumerate(names):
+		letter = chr(ord('a') + i)
+		print(f"[{letter}]. {x}")
+	choices = input("Enter the letter of the listing you want to view or type 'all' to show all")
+	if choices.lower() == "all": 
+		choices = [x for x in 'abcdefgh']
+	for index in choices: 
+		os.system("open {}".format(urls[ord(index)-ord('a')]))
+		# print("f{}".format(urls[ord(index)-ord('a')]))
 
-
+def displayListings(listings):
+	if not listings:
+		print(f"\n---Nothing found---\n")
+		return
+	index = 0
+	count = len(listings)
+	names=[x for x in listings.keys()]
+	urls = [x for x in listings.values()]
+	while index < count:
+		batchShow(names[index:index+8], urls[index:index+8])
+		index += 8
 
 def main(args=None):
 	fields = ['query', 'min_price', 'max_price']
@@ -62,20 +67,15 @@ def main(args=None):
 	while not done:
 		#if no args, prompt for search parameters
 		if not args:
-			urls = cl_search(promptForSearchParams())
-			batchOpen(urls)
+			searchResults = cl_search(promptForSearchParams())
+			displayListings(searchResults)
 			done = input("To make another search type \"y \"\t ").lower() != "y"
 		else:
 			userinputs = splitArgs(args)
 			apiparams = dict([x for x in zip(fields,userinputs)])
 			apiparams["posted_today"] = True
-			listings = cl_search(apiparams)
-			#show 8 strings
-			#choose some by number to open in tabs
-			#remove those from the list
-			#repeat
-			showListings(listings[0],listings[1])
-			#####batchOpen(urls)
+			searchResults = cl_search(searchResults)
+			displayListings(searchResults)
 			break
 
 if __name__ == "__main__":
@@ -90,7 +90,5 @@ if __name__ == "__main__":
 		main(sys.argv[1:])
 	except SystemExit:
 		pass
-	except:
-		print("There was an errror please try again later")
 	finally:
 		print(line)
