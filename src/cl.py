@@ -30,10 +30,9 @@ def parseArgs(args):
 def main(args):
 	while True:
 		apiparams = promptForSearchParams() if not args else parseArgs(args)
-		searchResults = search(apiparams) or print("Nothing found for {}".format(apiparams['query']))
+		searchResults = search(apiparams) or print(f"Nothing found for {  apiparams['query']  }")
 		displayListings(searchResults)
-		if args: break
-		if "y" not in  input("\nPress 'y' to make another search:  ").lower(): break
+		if  args or "y" not in  input("\nPress 'y' to make another search:  ").lower(): break
 
 if __name__ == "__main__":
 	stars = "*"*60
