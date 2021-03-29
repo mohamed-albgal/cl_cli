@@ -50,10 +50,8 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		pass
 	except Exception as e:
-		print(e)
-		print("\n\n\n...there was an error please try again...\n\n\n")
-
 		#print(e)
+		print("\n\n\n...there was an error please try again...\n\n\n")
 
 	finally:
 		print("\n",line)
