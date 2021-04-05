@@ -1,7 +1,7 @@
 #https://pypi.org/project/python-craigslist/
 from cl_api.get_from_cl import search
 import sys
-from util.display import displayListings
+from util.display import interactiveListings
 
 def promptForSearchParams():
 	params={}
@@ -16,32 +16,40 @@ def promptForSearchParams():
 	params['posted_today'] = input("Only today\'s posts?)(y/n)\t").lower() == 'y'
 	return params
 
-def parseArgs(args):
+def zipArgs(args):
 	apiparams = {}
 	today=False
-	# if last arg is a 'y' or 'n'
-	if len(args[-1]) == 1 and args[-1].lower() == "y":
-		today = True
-		del args[-1]
+	# see if last argument is a 'y'
+	today = len(args[-1]) == 1 and args[-1].lower() == "y"
 	apiparams = dict(zip(['query', 'min_price', 'max_price'],args))
 	apiparams['posted_today'] = today
 	return apiparams
 
+def showListingsNonInteractive(args):
+	listings = search(zipArgs(args))
+	if not listings: return
+	print(f"Query: {listings[0]['query']}\n")
+	for i in range(len(listings)):
+		print("[{}]---{}--{}---{}".format(i,listings[i]['price'], listings[i]['name'],listings[i]['location']))
+	print('\n')
+
+def printbanner():
+	stars = "*"*60;line = "-"*60;cl = '{:^60}'.format("CRAIGSLIST CLI")
+	print(stars);print(cl);print(stars);print(line)
+
 def main(args):
+	if args and args[0] == 'script':
+		showListingsNonInteractive(args[1:])
+		return
+	printbanner()
 	while True:
-		apiparams = promptForSearchParams() if not args else parseArgs(args)
+		apiparams = promptForSearchParams() if not args else zipArgs(args)
 		searchResults = search(apiparams) or print(f"Nothing found for {  apiparams['query']  }")
-		displayListings(searchResults)
+		interactiveListings(searchResults)
 		if  args or "y" not in  input("\nPress 'y' to make another search:  ").lower(): break
+	print("-"*60)
 
 if __name__ == "__main__":
-	stars = "*"*60
-	line = "-"*60
-	cl = '{:^60}'.format("CRAIGSLIST CLI")
-	print(stars)
-	print(cl)
-	print(stars)
-	print(line)
 	try:
 		main(sys.argv[1:])
 	except SystemExit:
@@ -49,8 +57,4 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		pass
 	except Exception as e:
-		#print(e)
 		print("\n\n\n...there was an error please try again...\n\n\n")
-
-	finally:
-		print("\n",line)

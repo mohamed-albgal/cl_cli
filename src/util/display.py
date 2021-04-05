@@ -18,7 +18,7 @@ def batchShow(listings, count,totalcount):
 		records = {x : records[x] for x in records.keys() if x in newKeys }
 	return True
 
-def displayListings(listings, batchSize=8):
+def interactiveListings(listings, batchSize=8):
         if not listings: return
         i=0
         count=1
