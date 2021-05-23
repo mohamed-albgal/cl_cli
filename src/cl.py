@@ -38,16 +38,22 @@ def showListingsNonInteractive(args):
         raise Exception
 
 
-def printbanner():
-	stars = "*"*60;line = "-"*60;cl = '{:^60}'.format("CRAIGSLIST CLI")
-	print(stars);print(cl);print(stars);print(line)
+def printbanner(query):
+        message = "Search Craigslist from the command line" if not query else "Query: {}".format(" ".join(query))
+        stars = "*" * 60
+        line = "-" * 60
+        print(stars)
+        print("{:^60}".format("CRAIGSLIST CLI"))
+        print("{:^60}".format(message))
+        print(stars)
+        print(line)
 
 def main(args):
         try:
             if args and args[0] == 'script':
                     showListingsNonInteractive(args[1:])
                     return
-            printbanner()
+            printbanner(args)
             while True:
                     apiparams = promptForSearchParams() if not args else zipArgs(args)
                     searchResults = search(apiparams) or print(f"Nothing found for {  apiparams['query']  }")

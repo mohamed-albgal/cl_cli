@@ -8,7 +8,7 @@ def batchShow(listings, count,totalcount):
 		for letter in records:
 			print(f"[{letter}]--{records[letter]['price'].strip()}--{records[letter]['name'].strip()}")
 		choices = input("\n\nEnter the letter(s) of the listing(s) or 'all' or 'q' to quit: ").lower()
-		if choices == "q": return False
+		if "q"in choices: return False
 		if not choices: break
 		#ignore invalid choices with filtter (duplicates and random letters)
 		choices = set(filter(lambda e: e in records.keys(), [x for x in choices])) if choices != "all" else records.keys()
